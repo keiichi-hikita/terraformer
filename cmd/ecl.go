@@ -20,7 +20,6 @@ import (
 	"github.com/GoogleCloudPlatform/terraformer/terraform_utils"
 
 	"github.com/spf13/cobra"
-	"runtime"
 )
 
 func newCmdECLImporter(options ImportOptions) *cobra.Command {
@@ -54,7 +53,6 @@ func newCmdECLImporter(options ImportOptions) *cobra.Command {
 	cmd.PersistentFlags().StringSliceVarP(&options.Filter, "filter", "f", []string{}, "ecl_compute_instance_v2=id1:id2:id4")
 	cmd.PersistentFlags().StringSliceVarP(&options.Regions, "regions", "", []string{}, "RegionOne")
 
-	runtime.Breakpoint()
 	return cmd
 }
 
