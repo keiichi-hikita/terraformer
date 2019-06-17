@@ -44,6 +44,7 @@ func providerImporterSubcommands() []func(options ImportOptions) *cobra.Command 
 		newCmdKubernetesImporter,
 		newCmdGithubImporter,
 		newCmdDatadogImporter,
+		newCmdECLImporter,
 	}
 }
 
@@ -56,6 +57,7 @@ func providerGenerators() map[string]func() terraform_utils.ProviderGenerator {
 		newKubernetesProvider,
 		newGitHubProvider,
 		newDataDogProvider,
+		newECLProvider,
 	} {
 		list[providerGen().GetName()] = providerGen
 	}

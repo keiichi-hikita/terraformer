@@ -18,6 +18,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+
 	"sort"
 	"strings"
 
@@ -67,6 +68,7 @@ func Import(provider terraform_utils.ProviderGenerator, options ImportOptions, a
 	if err != nil {
 		return err
 	}
+	// runtime.Breakpoint()
 
 	for _, service := range options.Resources {
 		log.Println(provider.GetName() + " importing... " + service)
@@ -121,6 +123,7 @@ func ImportFromPlan(provider terraform_utils.ProviderGenerator, plan *ImportPlan
 	provider.GetService().SetResources(plan.Resources)
 
 	importedResource := map[string][]terraform_utils.Resource{}
+	// runtime.Breakpoint()
 	for _, service := range options.Resources {
 		importedResource[service] = append(importedResource[service], plan.Resources...)
 	}
