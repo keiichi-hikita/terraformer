@@ -120,17 +120,7 @@ func Import(provider terraform_utils.ProviderGenerator, options ImportOptions, a
 
 func ImportFromPlan(provider terraform_utils.ProviderGenerator, plan *ImportPlan) error {
 	options := plan.Options
-<<<<<<< HEAD
-	provider.GetService().SetResources(plan.Resources)
-
-	importedResource := map[string][]terraform_utils.Resource{}
-	// runtime.Breakpoint()
-	for _, service := range options.Resources {
-		importedResource[service] = append(importedResource[service], plan.Resources...)
-	}
-=======
 	importedResource := plan.ImportedResource
->>>>>>> master
 
 	if options.Connect {
 		log.Println(provider.GetName() + " Connecting.... ")
