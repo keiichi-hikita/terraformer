@@ -57,6 +57,7 @@ func newImportCmd() *cobra.Command {
 		//Version:       version.String(),
 	}
 
+	cmd.AddCommand(newCmdPlanImporter(options))
 	for _, subcommand := range providerImporterSubcommands() {
 		cmd.AddCommand(subcommand(options))
 	}
@@ -68,7 +69,12 @@ func Import(provider terraform_utils.ProviderGenerator, options ImportOptions, a
 	if err != nil {
 		return err
 	}
-	// runtime.Breakpoint()
+	plan := &ImportPlan{
+		Provider:         provider.GetName(),
+		Options:          options,
+		Args:             args,
+		ImportedResource: map[string][]terraform_utils.Resource{},
+	}
 
 	for _, service := range options.Resources {
 		log.Println(provider.GetName() + " importing... " + service)
@@ -101,13 +107,7 @@ func Import(provider terraform_utils.ProviderGenerator, options ImportOptions, a
 		if err != nil {
 			return err
 		}
-	}
-
-	plan := &ImportPlan{
-		Provider:  provider.GetName(),
-		Options:   options,
-		Args:      args,
-		Resources: provider.GetService().GetResources(),
+		plan.ImportedResource[service] = append(plan.ImportedResource[service], provider.GetService().GetResources()...)
 	}
 
 	if options.Plan {
@@ -120,6 +120,7 @@ func Import(provider terraform_utils.ProviderGenerator, options ImportOptions, a
 
 func ImportFromPlan(provider terraform_utils.ProviderGenerator, plan *ImportPlan) error {
 	options := plan.Options
+<<<<<<< HEAD
 	provider.GetService().SetResources(plan.Resources)
 
 	importedResource := map[string][]terraform_utils.Resource{}
@@ -127,6 +128,9 @@ func ImportFromPlan(provider terraform_utils.ProviderGenerator, plan *ImportPlan
 	for _, service := range options.Resources {
 		importedResource[service] = append(importedResource[service], plan.Resources...)
 	}
+=======
+	importedResource := plan.ImportedResource
+>>>>>>> master
 
 	if options.Connect {
 		log.Println(provider.GetName() + " Connecting.... ")
