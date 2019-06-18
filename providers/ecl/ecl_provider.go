@@ -103,6 +103,9 @@ func (ECLProvider) GetResourceConnections() map[string]map[string][]string {
 		"dnsRecordSet": {
 			"dnsZone": []string{"zone_id", "self_link"},
 		},
+		"networkGatewayInterface": {
+			"networkInternetGateway": []string{"internet_gw_id", "self_link"},
+		},
 		"networkPublicIP": {
 			"networkInternetGateway": []string{"internet_gw_id", "self_link"},
 		},
