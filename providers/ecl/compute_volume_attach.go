@@ -30,50 +30,38 @@ type ComputeVolumeAttachGenerator struct {
 }
 
 // createResources iterate on all ecl_compute_instance_v2
-func (g *ComputeVolumeAttachGenerator) createResources(serverPage *pagination.Pager, client *eclcloud.ServiceClient) []terraform_utils.Resource {
+func (g *ComputeVolumeAttachGenerator) createResources(list *pagination.Pager, serverID string) []terraform_utils.Resource {
 	resources := []terraform_utils.Resource{}
 
-	serverPage.EachPage(func(page pagination.Page) (bool, error) {
-		servers, err := servers.ExtractServers(page)
+	list.EachPage(func(page pagination.Page) (bool, error) {
+
+		vas, err := volumeattach.ExtractVolumeAttachments(page)
 		if err != nil {
 			return false, err
 		}
 
-		for _, s := range servers {
-			serverID := s.ID
-			volumeAttachPage := volumeattach.List(client, serverID)
+		if len(vas) > 0 {
+			for _, va := range vas {
+				volumeID := va.VolumeID
+				id := fmt.Sprintf("%s/%s", volumeID, serverID)
+				name := fmt.Sprintf("%s-attach", volumeID)
 
-			volumeAttachPage.EachPage(func(vaPage pagination.Page) (bool, error) {
+				resource := terraform_utils.NewResource(
+					id,
+					name,
+					"ecl_compute_volume_attach_v2",
+					"ecl",
+					map[string]string{},
+					[]string{},
+					map[string]string{},
+				)
 
-				vas, err := volumeattach.ExtractVolumeAttachments(vaPage)
-				if err != nil {
-					return false, err
-				}
-
-				if len(vas) > 0 {
-					for _, va := range vas {
-						volumeID := va.VolumeID
-						id := fmt.Sprintf("%s/%s", serverID, volumeID)
-
-						resource := terraform_utils.NewResource(
-							id,
-							id,
-							"ecl_compute_volume_attach_v2",
-							"ecl",
-							map[string]string{},
-							[]string{},
-							map[string]string{},
-						)
-						resources = append(resources, resource)
-					}
-				}
-				return true, nil
-			})
+				resources = append(resources, resource)
+			}
 		}
 		return true, nil
 	})
 
-	// runtime.Breakpoint()
 	return resources
 }
 
@@ -98,8 +86,24 @@ func (g *ComputeVolumeAttachGenerator) InitResources() error {
 
 	list := servers.List(client, nil)
 
-	g.Resources = g.createResources(&list, client)
+	resources := []terraform_utils.Resource{}
+	list.EachPage(func(page pagination.Page) (bool, error) {
+		servers, err := servers.ExtractServers(page)
+		if err != nil {
+			return false, err
+		}
 
+		for _, s := range servers {
+			serverID := s.ID
+			volumeAttachPage := volumeattach.List(client, serverID)
+
+			volumeAttachResources := g.createResources(&volumeAttachPage, serverID)
+			resources = append(resources, volumeAttachResources...)
+		}
+		return true, nil
+	})
+
+	g.Resources = resources
 	g.PopulateIgnoreKeys()
 
 	return nil

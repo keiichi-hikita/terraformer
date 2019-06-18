@@ -90,18 +90,18 @@ func (p *ECLProvider) GetSupportedService() map[string]terraform_utils.ServiceGe
 
 func (ECLProvider) GetResourceConnections() map[string]map[string][]string {
 	return map[string]map[string][]string{
-		// "computeServer": {
-		// 	"computeKeypair": []string{"key_pair", "self_link"},
-		// },
-		// "computeVolumeAttach": {
-		// 	"computeServer": []string{"server_id", "self_link"},
-		// 	"computeVolume": []string{"volume_id", "self_link"},
-		// },
-		// "networkSubnet": {
-		// 	"networkNetwork": []string{"network_id", "self_link"},
-		// },
-		// "storageVolume": {
-		// 	"storageVirtualStorage": []string{"virtual_storage_id", "self_link"},
-		// },
+		"computeServer": {
+			"computeKeypair": []string{"key_pair", "self_link"},
+		},
+		"computeVolumeAttach": {
+			"computeServer": []string{"server_id", "self_link"},
+			"computeVolume": []string{"volume_id", "self_link"},
+		},
+		"networkSubnet": {
+			"networkNetwork": []string{"network_id", "self_link"},
+		},
+		"storageVolume": {
+			"storageVirtualStorage": []string{"virtual_storage_id", "self_link"},
+		},
 	}
 }
