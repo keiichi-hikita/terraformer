@@ -89,7 +89,7 @@ terraformer import ecl --resources=computeKeypair,computeServer,networkNetwork,n
 
 **Note:**
 
-**You need to set environment variables which are used by ECL provider'S authorization prior to execute above.**
+**You need to set environment variables which are used by ECL provider's authorization(like OS_AUTH_URL ...) prior to execute above.**
 
 List of supported ECL resources:
 
