@@ -87,6 +87,10 @@ Example:
 terraformer import ecl --resources=computeKeypair,computeServer,networkNetwork,networkSubnet --connect=true --region=jp1
 ```
 
+**Note:**
+
+**You need to set environment variables which are used by ECL provider prior to execute above.**
+
 List of supported ECL resources:
 
 *   `computeKeypair`
