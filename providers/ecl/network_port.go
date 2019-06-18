@@ -26,7 +26,7 @@ type NetworkPortGenerator struct {
 	ECLService
 }
 
-// createResources iterate on all openstack_networking_secgroup_v2
+// createResources iterate on all ecl_network_port_v2
 func (g *NetworkPortGenerator) createResources(list *pagination.Pager) []terraform_utils.Resource {
 	resources := []terraform_utils.Resource{}
 
@@ -60,7 +60,7 @@ func (g *NetworkPortGenerator) createResources(list *pagination.Pager) []terrafo
 	return resources
 }
 
-// Generate TerraformResources from OpenStack API,
+// Generate TerraformResources from ECL API,
 func (g *NetworkPortGenerator) InitResources() error {
 	opts, err := ecl.AuthOptionsFromEnv()
 	if err != nil {

@@ -59,7 +59,7 @@ func (g *ComputeKeypairGenerator) createResources(list *pagination.Pager) []terr
 	return resources
 }
 
-// Generate TerraformResources from OpenStack API,
+// Generate TerraformResources from ECL API,
 func (g *ComputeKeypairGenerator) InitResources() error {
 	opts, err := ecl.AuthOptionsFromEnv()
 	if err != nil {

@@ -19,7 +19,6 @@ import (
 	"github.com/nttcom/eclcloud"
 	"github.com/nttcom/eclcloud/ecl"
 	"github.com/nttcom/eclcloud/ecl/network/v2/networks"
-	// "github.com/nttcom/eclcloud/ecl/network/v2/extensions/security/rules"
 	"github.com/nttcom/eclcloud/pagination"
 )
 
@@ -27,7 +26,7 @@ type NetworkNetworkGenerator struct {
 	ECLService
 }
 
-// createResources iterate on all openstack_networking_secgroup_v2
+// createResources iterate on all ecl_network_network_v2
 func (g *NetworkNetworkGenerator) createResources(list *pagination.Pager) []terraform_utils.Resource {
 	resources := []terraform_utils.Resource{}
 
@@ -61,7 +60,7 @@ func (g *NetworkNetworkGenerator) createResources(list *pagination.Pager) []terr
 	return resources
 }
 
-// Generate TerraformResources from OpenStack API,
+// Generate TerraformResources from ECL API,
 func (g *NetworkNetworkGenerator) InitResources() error {
 	opts, err := ecl.AuthOptionsFromEnv()
 	if err != nil {
@@ -87,21 +86,3 @@ func (g *NetworkNetworkGenerator) InitResources() error {
 
 	return nil
 }
-
-// func (g *NetworkNetworkGenerator) PostConvertHook() error {
-// 	for i, r := range g.Resources {
-// 		if r.InstanceInfo.Type != "ecl_network_network_v2" {
-// 			continue
-// 		}
-// 		for _, sg := range g.Resources {
-// 			if sg.InstanceInfo.Type != "openstack_networking_secgroup_v2" {
-// 				continue
-// 			}
-// 			if r.InstanceState.Attributes["security_group_id"] == sg.InstanceState.Attributes["id"] {
-// 				g.Resources[i].Item["security_group_id"] = "${openstack_networking_secgroup_v2." + sg.ResourceName + ".id}"
-// 			}
-// 		}
-// 	}
-
-// 	return nil
-// }

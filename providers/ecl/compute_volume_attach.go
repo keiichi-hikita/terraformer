@@ -65,7 +65,7 @@ func (g *ComputeVolumeAttachGenerator) createResources(list *pagination.Pager, s
 	return resources
 }
 
-// Generate TerraformResources from OpenStack API,
+// Generate TerraformResources from ECL API,
 func (g *ComputeVolumeAttachGenerator) InitResources() error {
 	opts, err := ecl.AuthOptionsFromEnv()
 	if err != nil {
@@ -88,12 +88,12 @@ func (g *ComputeVolumeAttachGenerator) InitResources() error {
 
 	resources := []terraform_utils.Resource{}
 	list.EachPage(func(page pagination.Page) (bool, error) {
-		servers, err := servers.ExtractServers(page)
+		svs, err := servers.ExtractServers(page)
 		if err != nil {
 			return false, err
 		}
 
-		for _, s := range servers {
+		for _, s := range svs {
 			serverID := s.ID
 			volumeAttachPage := volumeattach.List(client, serverID)
 

@@ -15,34 +15,37 @@
 package ecl
 
 import (
-	"strings"
-
 	"github.com/GoogleCloudPlatform/terraformer/terraform_utils"
 	"github.com/nttcom/eclcloud"
 	"github.com/nttcom/eclcloud/ecl"
-	"github.com/nttcom/eclcloud/ecl/compute/v2/servers"
+	"github.com/nttcom/eclcloud/ecl/network/v2/gateway_interfaces"
 	"github.com/nttcom/eclcloud/pagination"
 )
 
-type ComputeServerGenerator struct {
+type NetworkGatewayInterfaceGenerator struct {
 	ECLService
 }
 
-// createResources iterate on all ecl_compute_instance_v2
-func (g *ComputeServerGenerator) createResources(list *pagination.Pager) []terraform_utils.Resource {
+// createResources iterate on all openstack_networking_secgroup_v2
+func (g *NetworkGatewayInterfaceGenerator) createResources(list *pagination.Pager) []terraform_utils.Resource {
 	resources := []terraform_utils.Resource{}
 
 	list.EachPage(func(page pagination.Page) (bool, error) {
-		servers, err := servers.ExtractServers(page)
+		interfaces, err := gateway_interfaces.ExtractGatewayInterfaces(page)
 		if err != nil {
 			return false, err
 		}
 
-		for _, s := range servers {
+		for _, iface := range interfaces {
+			name := iface.Name
+			if iface.Name == "" {
+				name = iface.ID
+			}
+
 			resource := terraform_utils.NewResource(
-				s.ID,
-				s.Name,
-				"ecl_compute_instance_v2",
+				iface.ID,
+				name,
+				"ecl_network_gateway_interface_v2",
 				"ecl",
 				map[string]string{},
 				[]string{},
@@ -58,7 +61,7 @@ func (g *ComputeServerGenerator) createResources(list *pagination.Pager) []terra
 }
 
 // Generate TerraformResources from ECL API,
-func (g *ComputeServerGenerator) InitResources() error {
+func (g *NetworkGatewayInterfaceGenerator) InitResources() error {
 	opts, err := ecl.AuthOptionsFromEnv()
 	if err != nil {
 		return err
@@ -69,44 +72,17 @@ func (g *ComputeServerGenerator) InitResources() error {
 		return err
 	}
 
-	client, err := ecl.NewComputeV2(provider, eclcloud.EndpointOpts{
+	client, err := ecl.NewNetworkV2(provider, eclcloud.EndpointOpts{
 		Region: g.GetArgs()["region"],
 	})
 	if err != nil {
 		return err
 	}
 
-	list := servers.List(client, nil)
+	list := gateway_interfaces.List(client, gateway_interfaces.ListOpts{})
 
 	g.Resources = g.createResources(&list)
 	g.PopulateIgnoreKeys()
-
-	return nil
-}
-
-func (g *ComputeServerGenerator) PostConvertHook() error {
-	for i, r := range g.Resources {
-		if r.InstanceInfo.Type != "ecl_compute_instance_v2" {
-			continue
-		}
-
-		// Copy "all_metadata.%" to "metadata.%"
-		for k, v := range g.Resources[i].InstanceState.Attributes {
-			if strings.HasPrefix(k, "all_metadata") {
-				newKey := strings.Replace(k, "all_metadata", "metadata", 1)
-				g.Resources[i].InstanceState.Attributes[newKey] = v
-			}
-		}
-		// Replace "all_metadata" to "metadata"
-		// because "all_metadata" field cannot be set as resource argument
-		for k, v := range g.Resources[i].Item {
-			if strings.HasPrefix(k, "all_metadata") {
-				newKey := strings.Replace(k, "all_metadata", "metadata", 1)
-				g.Resources[i].Item[newKey] = v
-				delete(g.Resources[i].Item, k)
-			}
-		}
-	}
 
 	return nil
 }

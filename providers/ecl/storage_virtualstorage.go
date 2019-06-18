@@ -26,7 +26,7 @@ type StorageVirtualStorageGenerator struct {
 	ECLService
 }
 
-// createResources iterate on all openstack_networking_secgroup_v2
+// createResources iterate on all ecl_storage_virtualstorage_v1
 func (g *StorageVirtualStorageGenerator) createResources(list *pagination.Pager) []terraform_utils.Resource {
 	resources := []terraform_utils.Resource{}
 
@@ -55,7 +55,7 @@ func (g *StorageVirtualStorageGenerator) createResources(list *pagination.Pager)
 	return resources
 }
 
-// Generate TerraformResources from OpenStack API,
+// Generate TerraformResources from ECL API,
 func (g *StorageVirtualStorageGenerator) InitResources() error {
 	opts, err := ecl.AuthOptionsFromEnv()
 	if err != nil {

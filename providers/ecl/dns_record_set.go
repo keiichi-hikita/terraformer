@@ -15,39 +15,42 @@
 package ecl
 
 import (
-	"strings"
+	"fmt"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraform_utils"
 	"github.com/nttcom/eclcloud"
 	"github.com/nttcom/eclcloud/ecl"
-	"github.com/nttcom/eclcloud/ecl/compute/v2/servers"
+	"github.com/nttcom/eclcloud/ecl/dns/v2/recordsets"
+	"github.com/nttcom/eclcloud/ecl/dns/v2/zones"
 	"github.com/nttcom/eclcloud/pagination"
 )
 
-type ComputeServerGenerator struct {
+type DNSRecordSetGenerator struct {
 	ECLService
 }
 
-// createResources iterate on all ecl_compute_instance_v2
-func (g *ComputeServerGenerator) createResources(list *pagination.Pager) []terraform_utils.Resource {
+// createResources iterate on all ecl_dns_recordset_v2
+func (g *DNSRecordSetGenerator) createResources(list *pagination.Pager, zoneID string) []terraform_utils.Resource {
 	resources := []terraform_utils.Resource{}
 
 	list.EachPage(func(page pagination.Page) (bool, error) {
-		servers, err := servers.ExtractServers(page)
+		records, err := recordsets.ExtractRecordSets(page)
 		if err != nil {
 			return false, err
 		}
 
-		for _, s := range servers {
+		for _, r := range records {
+			id := fmt.Sprintf("%s/%s", zoneID, r.ID)
 			resource := terraform_utils.NewResource(
-				s.ID,
-				s.Name,
-				"ecl_compute_instance_v2",
+				id,
+				id,
+				"ecl_dns_recordset_v2",
 				"ecl",
 				map[string]string{},
 				[]string{},
 				map[string]string{},
 			)
+
 			resources = append(resources, resource)
 		}
 
@@ -58,7 +61,7 @@ func (g *ComputeServerGenerator) createResources(list *pagination.Pager) []terra
 }
 
 // Generate TerraformResources from ECL API,
-func (g *ComputeServerGenerator) InitResources() error {
+func (g *DNSRecordSetGenerator) InitResources() error {
 	opts, err := ecl.AuthOptionsFromEnv()
 	if err != nil {
 		return err
@@ -69,44 +72,35 @@ func (g *ComputeServerGenerator) InitResources() error {
 		return err
 	}
 
-	client, err := ecl.NewComputeV2(provider, eclcloud.EndpointOpts{
+	client, err := ecl.NewDNSV2(provider, eclcloud.EndpointOpts{
 		Region: g.GetArgs()["region"],
 	})
 	if err != nil {
 		return err
 	}
 
-	list := servers.List(client, nil)
+	list := zones.List(client, zones.ListOpts{})
 
-	g.Resources = g.createResources(&list)
+	resources := []terraform_utils.Resource{}
+
+	list.EachPage(func(page pagination.Page) (bool, error) {
+		zns, err := zones.ExtractZones(page)
+		if err != nil {
+			return false, err
+		}
+
+		for _, z := range zns {
+			zoneID := z.ID
+			recordSetPage := recordsets.ListByZone(client, zoneID, recordsets.ListOpts{})
+
+			recordSetResources := g.createResources(&recordSetPage, zoneID)
+			resources = append(resources, recordSetResources...)
+		}
+		return true, nil
+	})
+
+	g.Resources = resources
 	g.PopulateIgnoreKeys()
-
-	return nil
-}
-
-func (g *ComputeServerGenerator) PostConvertHook() error {
-	for i, r := range g.Resources {
-		if r.InstanceInfo.Type != "ecl_compute_instance_v2" {
-			continue
-		}
-
-		// Copy "all_metadata.%" to "metadata.%"
-		for k, v := range g.Resources[i].InstanceState.Attributes {
-			if strings.HasPrefix(k, "all_metadata") {
-				newKey := strings.Replace(k, "all_metadata", "metadata", 1)
-				g.Resources[i].InstanceState.Attributes[newKey] = v
-			}
-		}
-		// Replace "all_metadata" to "metadata"
-		// because "all_metadata" field cannot be set as resource argument
-		for k, v := range g.Resources[i].Item {
-			if strings.HasPrefix(k, "all_metadata") {
-				newKey := strings.Replace(k, "all_metadata", "metadata", 1)
-				g.Resources[i].Item[newKey] = v
-				delete(g.Resources[i].Item, k)
-			}
-		}
-	}
 
 	return nil
 }

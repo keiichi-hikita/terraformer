@@ -29,10 +29,6 @@ type ECLProvider struct {
 
 const eclProviderVersion = "~>1.0.0"
 
-// func (p ECLProvider) GetResourceConnections() map[string]map[string][]string {
-// 	return map[string]map[string][]string{}
-// }
-
 func (p ECLProvider) GetProviderData(arg ...string) map[string]interface{} {
 	return map[string]interface{}{
 		"provider": map[string]interface{}{
@@ -73,18 +69,25 @@ func (p *ECLProvider) InitService(serviceName string) error {
 	return nil
 }
 
-// GetOpenStackSupportService return map of support service for OpenStack
+// GetSupportedService return map of support service for ECL
 func (p *ECLProvider) GetSupportedService() map[string]terraform_utils.ServiceGenerator {
 	return map[string]terraform_utils.ServiceGenerator{
-		"computeServer":         &ComputeServerGenerator{},
-		"computeKeypair":        &ComputeKeypairGenerator{},
-		"computeVolume":         &ComputeVolumeGenerator{},
-		"computeVolumeAttach":   &ComputeVolumeAttachGenerator{},
-		"networkNetwork":        &NetworkNetworkGenerator{},
-		"networkSubnet":         &NetworkSubnetGenerator{},
-		"networkPort":           &NetworkPortGenerator{},
-		"storageVirtualStorage": &StorageVirtualStorageGenerator{},
-		"storageVolume":         &StorageVolumeGenerator{},
+		"computeKeypair":               &ComputeKeypairGenerator{},
+		"computeServer":                &ComputeServerGenerator{},
+		"computeVolumeAttach":          &ComputeVolumeAttachGenerator{},
+		"computeVolume":                &ComputeVolumeGenerator{},
+		"dnsZone":                      &DNSZoneGenerator{},
+		"dnsRecordSet":                 &DNSRecordSetGenerator{},
+		"networkCommonFunctionGateway": &NetworkCommonFunctionGatewayGenerator{},
+		"networkGatewayInterface":      &NetworkGatewayInterfaceGenerator{},
+		"networkInternetGateway":       &NetworkInternetGatewayGenerator{},
+		"networkNetwork":               &NetworkNetworkGenerator{},
+		"networkPort":                  &NetworkPortGenerator{},
+		"networkPublicIP":              &NetworkPublicIPGenerator{},
+		"networkStaticRoute":           &NetworkStaticRouteGenerator{},
+		"networkSubnet":                &NetworkSubnetGenerator{},
+		"storageVirtualStorage":        &StorageVirtualStorageGenerator{},
+		"storageVolume":                &StorageVolumeGenerator{},
 	}
 }
 
@@ -96,6 +99,15 @@ func (ECLProvider) GetResourceConnections() map[string]map[string][]string {
 		"computeVolumeAttach": {
 			"computeServer": []string{"server_id", "self_link"},
 			"computeVolume": []string{"volume_id", "self_link"},
+		},
+		"dnsRecordSet": {
+			"dnsZone": []string{"zone_id", "self_link"},
+		},
+		"networkPublicIP": {
+			"networkInternetGateway": []string{"internet_gw_id", "self_link"},
+		},
+		"networkStaticRoute": {
+			"networkInternetGateway": []string{"internet_gw_id", "self_link"},
 		},
 		"networkSubnet": {
 			"networkNetwork": []string{"network_id", "self_link"},

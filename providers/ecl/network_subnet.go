@@ -19,7 +19,6 @@ import (
 	"github.com/nttcom/eclcloud"
 	"github.com/nttcom/eclcloud/ecl"
 	"github.com/nttcom/eclcloud/ecl/network/v2/subnets"
-	// "github.com/nttcom/eclcloud/ecl/network/v2/extensions/security/rules"
 	"github.com/nttcom/eclcloud/pagination"
 )
 
@@ -27,7 +26,7 @@ type NetworkSubnetGenerator struct {
 	ECLService
 }
 
-// createResources iterate on all openstack_networking_secgroup_v2
+// createResources iterate on all ecl_network_subnet_v2
 func (g *NetworkSubnetGenerator) createResources(list *pagination.Pager) []terraform_utils.Resource {
 	resources := []terraform_utils.Resource{}
 
@@ -61,7 +60,7 @@ func (g *NetworkSubnetGenerator) createResources(list *pagination.Pager) []terra
 	return resources
 }
 
-// Generate TerraformResources from OpenStack API,
+// Generate TerraformResources from ECL API,
 func (g *NetworkSubnetGenerator) InitResources() error {
 	opts, err := ecl.AuthOptionsFromEnv()
 	if err != nil {

@@ -60,7 +60,7 @@ func (g *NetworkCommonFunctionGatewayGenerator) createResources(list *pagination
 	return resources
 }
 
-// Generate TerraformResources from OpenStack API,
+// Generate TerraformResources from ECL API,
 func (g *NetworkCommonFunctionGatewayGenerator) InitResources() error {
 	opts, err := ecl.AuthOptionsFromEnv()
 	if err != nil {
